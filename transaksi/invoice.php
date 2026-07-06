@@ -11,8 +11,7 @@ $order_id = $_GET['order_id'] ?? null;
 
 if (isset($_GET['confirm'], $order_id) && $_GET['confirm'] === 'true') {
     $stmt = $conn->prepare("UPDATE orders SET payment_status = 'paid', status = 'completed' WHERE id = ?");
-    $stmt->bind_param("i", $order_id);
-    $stmt->execute();
+    $stmt->execute([$order_id]);
     header("Location: invoice.php?order_id=$order_id");
     exit();
 }
@@ -29,9 +28,8 @@ $stmt = $conn->prepare(
      JOIN game g ON od.game_id = g.id
      WHERE o.id = ? AND o.user_id = ?"
 );
-$stmt->bind_param("ii", $order_id, $_SESSION['user_id']);
-$stmt->execute();
-$order = $stmt->get_result()->fetch_assoc();
+$stmt->execute([$order_id, $_SESSION['user_id']]);
+$order = $stmt->fetch();
 
 if (!$order) {
     header("Location: ../dashboard_user.php");

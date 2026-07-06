@@ -17,13 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = 'Username and password must be filled!';
     } else {
         $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows === 1) {
-            $user = $result->fetch_assoc();
-            
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
+
+        if ($user) {
             if ($username === 'admin' && $password === 'admin123') {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];

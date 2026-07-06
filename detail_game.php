@@ -7,11 +7,10 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$game_id = $_GET['game_id'];
+$game_id = $_GET['game_id'] ?? null;
 $stmt = $conn->prepare("SELECT * FROM game WHERE id = ?");
-$stmt->bind_param("i", $game_id);
-$stmt->execute();
-$game = $stmt->get_result()->fetch_assoc();
+$stmt->execute([$game_id]);
+$game = $stmt->fetch();
 
 if (!$game) {
     header("Location: dashboard_user.php");

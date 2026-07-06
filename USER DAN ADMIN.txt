@@ -1,7 +1,0 @@
-username : admin
-password : admin123
-
-username : kevin (bisa bikin akun sendiri di tambah akun)
-password : 12345678
-
-🙏🙏🙏🙏

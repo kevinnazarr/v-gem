@@ -14,10 +14,8 @@ if (!isset($_GET['id'])) {
 
 $id = intval($_GET['id']);
 $query = $conn->prepare("SELECT * FROM game WHERE id = ?");
-$query->bind_param("i", $id);
-$query->execute();
-$result = $query->get_result();
-$game = $result->fetch_assoc();
+$query->execute([$id]);
+$game = $query->fetch();
 
 if (!$game) {
     echo "<div class='alert error'>Game tidak ditemukan.</div>";
@@ -75,53 +73,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = 'Semua field wajib diisi!';
     }
 
-    if (empty($error)) {
-        $sql = "UPDATE game SET 
-            name=?, description=?, price=?, release_date=?, publisher=?, platform=?, genre=?,
-            min_os=?, min_processor=?, min_ram=?, min_gpu=?, min_storage=?,
-            rec_os=?, rec_processor=?, rec_ram=?, rec_gpu=?, rec_storage=?, image_url=?
-            WHERE id=?";
-        $stmt = $conn->prepare($sql);
-        if ($stmt) {
-            $stmt->bind_param(
-                "ssdsssssssssssssssi",
-                $name,
-                $description,
-                $price,
-                $release_date,
-                $publisher,
-                $platform,
-                $genre,
-                $min_os,
-                $min_processor,
-                $min_ram,
-                $min_gpu,
-                $min_storage,
-                $rec_os,
-                $rec_processor,
-                $rec_ram,
-                $rec_gpu,
-                $rec_storage,
-                $image_url,
-                $id
-            );
-            if ($stmt->execute()) {
-                $success = 'Game berhasil diperbarui!';
-                // Refresh data
-                $query = $conn->prepare("SELECT * FROM game WHERE id = ?");
-                $query->bind_param("i", $id);
-                $query->execute();
-                $result = $query->get_result();
-                $game = $result->fetch_assoc();
+        if (empty($error)) {
+            $sql = "UPDATE game SET 
+                name=?, description=?, price=?, release_date=?, publisher=?, platform=?, genre=?,
+                min_os=?, min_processor=?, min_ram=?, min_gpu=?, min_storage=?,
+                rec_os=?, rec_processor=?, rec_ram=?, rec_gpu=?, rec_storage=?, image_url=?
+                WHERE id=?";
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $params = [
+                    $name, $description, $price, $release_date, $publisher, $platform, $genre,
+                    $min_os, $min_processor, $min_ram, $min_gpu, $min_storage,
+                    $rec_os, $rec_processor, $rec_ram, $rec_gpu, $rec_storage, $image_url,
+                    $id
+                ];
+                if ($stmt->execute($params)) {
+                    $success = 'Game berhasil diperbarui!';
+                    // Refresh data
+                    $query = $conn->prepare("SELECT * FROM game WHERE id = ?");
+                    $query->execute([$id]);
+                    $game = $query->fetch();
+                } else {
+                    $error = 'Gagal memperbarui game: ' . implode(":", $stmt->errorInfo());
+                }
+                $stmt = null; // Close statement
             } else {
-                $error = 'Gagal memperbarui game.';
+                $error = 'Kesalahan query: ' . implode(":", $conn->errorInfo());
             }
-            $stmt->close();
-        } else {
-            $error = 'Kesalahan query.';
         }
-    }
-}
 ?>
 
 <!DOCTYPE html>

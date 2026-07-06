@@ -9,14 +9,12 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 $user_query = $conn->prepare("SELECT * FROM users WHERE id = ?");
-$user_query->bind_param("i", $user_id);
-$user_query->execute();
-$user_data = $user_query->get_result()->fetch_assoc();
+$user_query->execute([$user_id]);
+$user_data = $user_query->fetch();
 
 $wishlist_query = $conn->prepare("SELECT game_id FROM wishlist WHERE user_id = ?");
-$wishlist_query->bind_param("i", $user_id);
-$wishlist_query->execute();
-$wishlist = $wishlist_query->get_result()->fetch_all(MYSQLI_ASSOC);
+$wishlist_query->execute([$user_id]);
+$wishlist = $wishlist_query->fetchAll();
 $wishlist_ids = array_column($wishlist, 'game_id');
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -43,10 +41,8 @@ switch ($sort) {
 }
 
 $games_query = $conn->prepare($query);
-$types = str_repeat('s', count($params));
-$games_query->bind_param($types, ...$params);
-$games_query->execute();
-$games_result = $games_query->get_result();
+$games_query->execute($params);
+$games_result = $games_query->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -124,15 +120,15 @@ $games_result = $games_query->get_result();
             </div>
 
             <div class="game-grid">
-                <?php if ($games_result->num_rows > 0): ?>
-                    <?php while ($game = $games_result->fetch_assoc()): ?>
+                <?php if (count($games_result) > 0): ?>
+                    <?php foreach ($games_result as $game): ?>
                         <div class="game-card" data-game-id="<?= $game['id'] ?>">
                             <div class="card-inner">
                                 <div class="game-thumbnail">
                                     <img src="aset/img/game/<?= htmlspecialchars($game['image_url']) ?>" 
                                          alt="<?= htmlspecialchars($game['name']) ?>">
                                     <div class="hover-overlay">
-                                        <button class="btn-wishlist <?= in_array($game['id'], $wishlist_ids) ? 'active' : '' ?>" 
+                                        <button class="btn-wishlist <?= in_array($game['id'], array_column($wishlist, 'game_id')) ? 'active' : '' ?>" 
                                                 onclick="toggleWishlist(<?= $game['id'] ?>)">
                                             <i data-lucide="heart"></i>
                                         </button>
@@ -149,7 +145,7 @@ $games_result = $games_query->get_result();
                                 </div>
                             </div>
                         </div>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 <?php else: ?>
                     <div class="empty-state">
                         <i data-lucide="gamepad"></i>

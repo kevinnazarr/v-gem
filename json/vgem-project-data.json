@@ -1,0 +1,99 @@
+{
+    "id": "vgem-game-store",
+    "slug": "vgem-game-store",
+    "category": "school",
+    "featured": true,
+    "tags": ["PHP", "MySQL", "JavaScript"],
+    "link": "https://vgem-game-store.com",
+    "githubLink": "https://github.com/kevinnazar/vgem-game-store",
+    "image": "/images/projects/vgem-game-store/cover.jpeg",
+    "gallery": [
+        "/images/projects/vgem-game-store/img1.jpeg",
+        "/images/projects/vgem-game-store/img2.jpeg"
+    ],
+    "i18n": {
+        "en": {
+            "title": "VGEM - Game Store with PHP and MySQL",
+            "description": "A comprehensive game store website built with PHP, featuring game browsing, purchasing, and admin management with MySQL database integration.",
+            "background": "This project was created as a **school assignment** to demonstrate the implementation of a complete e-commerce platform for digital games. The website was developed to showcase web development skills including database management, user authentication, and shopping cart functionality.",
+            "goals": [
+                "Create a **functional game store** using PHP and MySQL",
+                "Implement user authentication and admin panels",
+                "Build game catalog with search and filtering features",
+                "Develop shopping cart and payment processing"
+            ],
+            "overview": "The project utilizes **PHP 8.x** with MySQL database for data management. The application consists of **user-facing pages** (dashboard, game details, shopping cart, invoice system) and **admin functionality** (game management, user management, sales reporting). The codebase is organized with **MVC architecture**, featuring **PDO database abstraction**, **session-based authentication**, and **secure password hashing**.",
+            "impact": "Successfully implemented a complete game e-commerce platform with over 50+ code files, demonstrating proficiency in PHP development, database design, and web application deployment.",
+            "features": [
+                {
+                    "title": "User Authentication",
+                    "description": "**Secure login system** with session management, supporting both regular users and admin access to different parts of the application."
+                },
+                {
+                    "title": "Game Catalog",
+                    "description": "**Dynamic game browsing** with search functionality, price filtering, genre categorization, and responsive game display."
+                },
+                {
+                    "title": "Shopping Cart",
+                    "description": "**Complete purchasing flow** from game selection to payment processing, with multiple payment methods and invoice generation."
+                },
+                {
+                    "title": "Admin Dashboard",
+                    "description": "**Comprehensive admin interface** for managing games, users, viewing sales statistics, and system-wide controls."
+                }
+            ],
+            "challenges": [
+                {
+                    "title": "Database Architecture",
+                    "problem": "**Inconsistent database API** - koneksi.php uses MySQL via PDO while several pages still reference mysqli functions.",
+                    "solution": "**Standardized to PDO** across all modules using prepared statements for better security and performance."
+                },
+                {
+                    "title": "Authentication System", "problem": "**Complex role-based access** requiring separate handling for admin and regular users with different dashboard routes.",
+                    "solution": "**Modularized authentication logic** with centralized session validation and role checking functions."
+                }
+            ]
+        },
+        "id": {
+            "title": "VGEM - Toko Game dengan PHP dan MySQL",
+            "description": "Situs web toko game komprehensif yang dibangun dengan PHP, menampilkan fitur-fitur seperti penjelajahan game, pembelian, dan panel admin dengan integrasi basis data MySQL.",
+            "background": "Project ini dibuat sebagai **tugas sekolah** untuk menunjukkan implementasi platform e-commerce lengkap untuk game digital. Website ini dikembangkan untuk menunjukkan keterampilan dalam pengembangan web termasuk manajemen database, autentikasi pengguna, dan fungsi keranjang belanja.",
+            "goals": [
+                "Membuat **toko game yang fungsional** menggunakan PHP dan MySQL",
+                "Menerapkan sistem autentikasi pengguna dan panel admin",
+                "Membangun katalog game dengan fitur pencarian dan filter",
+                "Mengembangkan alur pembayaran keranjang belanja"
+            ],
+            "overview": "Project ini menggunakan **PHP 8.x** dengan MySQL database untuk manajemen data. Aplikasi ini terdiri dari **halaman depan untuk pengguna** (dashboard, detail game, keranjang belanja, sistem invoice) dan **fungsi admin** (manajemen game, manajemen pengguna, laporan penjualan). Arsitektur kode mengikuti **pattern MVC**, menampilkan **abstraksi database PDO**, **manajemen sesi**, dan **hashing password yang aman**.",
+            "impact": "Berhasil mengimplementasikan platform e-commerce game lengkap dengan lebih dari 50+ file kode, menunjukkan keahlian dalam pengembangan PHP, desain database, dan deployment aplikasi web.",
+            "features": [
+                {
+                    "title": "Autentikasi Pengguna",
+                    "description": "**Sistem login aman** dengan manajemen sesi, mendukung akses terpisah untuk pengguna biasa dan admin ke bagian-bagian berbeda dari aplikasi."
+                },
+                {
+                    "title": "Katalog Game",
+                    "description": "**Penjelajahan game dinamis** dengan fitur pencarian, filtrasi harga, kategorisasi genre, dan tampilan game yang responsif."
+                },
+                {
+                    "title": "Keranjang Belanja",
+                    "description": "**Alur pembelian lengkap** dari pemilihan game hingga proses pembayaran, dengan beberapa metode pembayaran dan generasi invoice."
+                },
+                {
+                    "title": "Panel Admin",
+                    "description": "**Antarmuka admin komprehensif** untuk mengelola game, pengguna, melihat statistik penjualan, dan kontrol sistem secara keseluruhan."
+                }
+            ],
+            "challenges": [
+                {
+                    "title": "Arsitektur Database", "problem": "**Inkonsistensi API database** - koneksi.php menggunakan MySQL via PDO sementara beberapa halaman masih merujuk fungsi mysqli.",
+                    "solution": "**Standardisasi ke PDO** di seluruh modul menggunakan prepared statements untuk keamanan dan performa yang lebih baik."
+                },
+                {
+                    "title": "Sistem Autentikasi", "problem": "**Akses berbasis peran yang kompleks** memerlukan penanganan terpisah untuk admin dan pengguna biasa dengan rute dashboard yang berbeda.",
+                    "solution": "**Mengorganisir logika autentikasi** dengan validasi sesi yang terpusat dan fungsi pengecekan peran."
+                }
+            ]
+        }
+    }
+}

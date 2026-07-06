@@ -66,8 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $stmt = $conn->prepare($sql);
         if ($stmt) {
-            $stmt->bind_param(
-                "ssdsssssssssssssss",
+            if ($stmt->execute([
                 $name,
                 $description,
                 $price,
@@ -86,15 +85,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $rec_gpu,
                 $rec_storage,
                 $image_url
-            );
-            if ($stmt->execute()) {
+            ])) {
                 $success = 'Game berhasil ditambahkan!';
             } else {
-                $error = 'Gagal menambahkan game.';
+                $error = 'Gagal menambahkan game: ' . implode(":", $stmt->errorInfo());
             }
-            $stmt->close();
+            $stmt = null;
         } else {
-            $error = 'Kesalahan query.';
+            $error = 'Kesalahan query: ' . implode(":", $conn->errorInfo());
         }
     }
 }

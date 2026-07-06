@@ -8,19 +8,18 @@ if (!isset($_SESSION['username']) || $_SESSION['username'] !== 'admin') {
 }
 
 function resetGameIdOrder($conn) {
-    $conn->query("ALTER TABLE game AUTO_INCREMENT = 1");
+    $conn->exec("SELECT setval('game_id_seq', (SELECT MAX(id) FROM game), FALSE)");
 }
 
 function resetUserIdOrder($conn) {
-    $conn->query("ALTER TABLE users AUTO_INCREMENT = 1");
+    $conn->exec("SELECT setval('users_id_seq', (SELECT MAX(id) FROM users), FALSE)");
 }
 
 if (isset($_GET['delete_game'])) {
     $game_id = $_GET['delete_game'];
     $stmt = $conn->prepare("DELETE FROM game WHERE id = ?");
-    $stmt->bind_param("i", $game_id);
-    $stmt->execute();
-    resetGameIdOrder($conn); // Reset urutan ID game
+    $stmt->execute([$game_id]);
+    resetGameIdOrder($conn); 
     header("Location: admin_dashboard.php?success=Game berhasil dihapus");
     exit();
 }
@@ -28,9 +27,8 @@ if (isset($_GET['delete_game'])) {
 if (isset($_GET['delete_user'])) {
     $user_id = $_GET['delete_user'];
     $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND role != 'admin'");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    resetUserIdOrder($conn); // Reset urutan ID user
+    $stmt->execute([$user_id]);
+    resetUserIdOrder($conn); 
     header("Location: admin_dashboard.php?success=Pengguna berhasil dihapus");
     exit();
 }
@@ -45,22 +43,20 @@ function getStatistics($conn) {
 
     $query = "
         SELECT 
-            (SELECT IFNULL(COUNT(*), 0) FROM users WHERE role = 'user') as users_count,
-            (SELECT IFNULL(COUNT(*), 0) FROM game) as games_count,
-            (SELECT IFNULL(SUM(total), 0) FROM orders WHERE status = 'completed') as sales_total,
-            (SELECT IFNULL(COUNT(*), 0) FROM orders) as orders_count
+            (SELECT COALESCE(COUNT(*), 0) FROM users WHERE role = 'user') as users_count,
+            (SELECT COALESCE(COUNT(*), 0) FROM game) as games_count,
+            (SELECT COALESCE(SUM(total), 0) FROM orders WHERE status = 'completed') as sales_total,
+            (SELECT COALESCE(COUNT(*), 0) FROM orders) as orders_count
     ";
 
     $result = $conn->query($query);
     
     if (!$result) {
-        error_log("Database error: " . $conn->error);
+        error_log("Database error: " . implode(":", $conn->errorInfo()));
         return $stats;
     }
 
-    if ($result->num_rows > 0) {
-        $stats = $result->fetch_assoc();
-    }
+    $stats = $result->fetch(PDO::FETCH_ASSOC);
 
     return $stats;
 }
@@ -74,19 +70,18 @@ $recent_orders = $conn->query("
     JOIN users u ON o.user_id = u.id
     ORDER BY o.order_date DESC
     LIMIT 5
-");
+")->fetchAll(PDO::FETCH_ASSOC);
 
-$games = $conn->query("SELECT * FROM game ORDER BY created_at DESC"); 
+$games = $conn->query("SELECT * FROM game ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC); 
 
-$users = $conn->query("SELECT id, username, email, created_at FROM users WHERE role = 'user' ORDER BY created_at DESC");
+$users = $conn->query("SELECT id, username, email, created_at FROM users WHERE role = 'user' ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 
 $search_results = [];
 if (isset($_GET['search'])) {
     $search_term = "%".$_GET['search']."%";
     $stmt = $conn->prepare("SELECT * FROM game WHERE name LIKE ?");
-    $stmt->bind_param("s", $search_term);
-    $stmt->execute();
-    $search_results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->execute([$search_term]);
+    $search_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
 
@@ -198,8 +193,8 @@ if (isset($_GET['search'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if ($games && $games->num_rows > 0): ?>
-                                <?php while ($game = $games->fetch_assoc()): ?>
+                            <?php if (count($games) > 0): ?>
+                                <?php foreach ($games as $game): ?>
                                     <tr>
                                         <td><?= $game['id'] ?></td>
                                         <td>
@@ -217,7 +212,7 @@ if (isset($_GET['search'])) {
                                             </a>
                                         </td>
                                     </tr>
-                                <?php endwhile; ?>
+                                <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
                                     <td colspan="6">Tidak ada game ditemukan.</td>
@@ -242,8 +237,8 @@ if (isset($_GET['search'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if ($users && $users->num_rows > 0): ?>
-                                <?php while ($user = $users->fetch_assoc()): ?>
+                            <?php if (count($users) > 0): ?>
+                                <?php foreach ($users as $user): ?>
                                 <tr>
                                     <td><?= $user['id'] ?></td>
                                     <td><?= htmlspecialchars($user['username']) ?></td>
@@ -255,7 +250,7 @@ if (isset($_GET['search'])) {
                                         </a>
                                     </td>
                                 </tr>
-                                <?php endwhile; ?>
+                                <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
                                     <td colspan="5">Tidak ada pengguna ditemukan.</td>
@@ -280,8 +275,8 @@ if (isset($_GET['search'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if ($recent_orders && $recent_orders->num_rows > 0): ?>
-                                <?php while ($order = $recent_orders->fetch_assoc()): ?>
+                            <?php if (count($recent_orders) > 0): ?>
+                                <?php foreach ($recent_orders as $order): ?>
                                 <tr>
                                     <td><?= $order['id'] ?></td>
                                     <td><?= htmlspecialchars($order['username']) ?></td>
@@ -289,7 +284,7 @@ if (isset($_GET['search'])) {
                                     <td><?= date('d M Y H:i', strtotime($order['order_date'])) ?></td>
                                     <td><span class="status-badge <?= $order['status'] ?>"><?= ucfirst($order['status']) ?></span></td>
                                 </tr>
-                                <?php endwhile; ?>
+                                <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
                                     <td colspan="5">Tidak ada data pesanan.</td>

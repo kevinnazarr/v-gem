@@ -7,11 +7,10 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$game_id = $_GET['game_id'];
+$game_id = $_GET['game_id'] ?? null;
 $stmt = $conn->prepare("SELECT * FROM game WHERE id = ?");
-$stmt->bind_param("i", $game_id);
-$stmt->execute();
-$game = $stmt->get_result()->fetch_assoc();
+$stmt->execute([$game_id]);
+$game = $stmt->fetch();
 
 if (!$game) {
     header("Location: ../dashboard_user.php");
@@ -19,24 +18,22 @@ if (!$game) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $conn->begin_transaction();
+    $conn->beginTransaction();
     try {
         $stmt = $conn->prepare("INSERT INTO orders 
             (user_id, total, status, payment_method, payment_status) 
             VALUES (?, ?, 'completed', ?, 'paid')");
-        $stmt->bind_param("ids", 
+        $stmt->execute([
             $_SESSION['user_id'], 
             $game['price'], 
             $_POST['payment_method']
-        );
-        $stmt->execute();
-        $order_id = $conn->insert_id;
+        ]);
+        $order_id = $conn->lastInsertId();
 
         $stmt = $conn->prepare("INSERT INTO order_details 
             (order_id, game_id, quantity, price) 
             VALUES (?, ?, 1, ?)");
-        $stmt->bind_param("iid", $order_id, $game_id, $game['price']);
-        $stmt->execute();
+        $stmt->execute([$order_id, $game_id, $game['price']]);
 
         $conn->commit();
         header("Location: invoice.php?order_id=$order_id");
